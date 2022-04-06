@@ -21,11 +21,23 @@ beforeEach(async () => {
 })
 
 test('Should signup a new user', async () => {
-    await request(app).post('/users').send({
+    const response = await request(app).post('/users').send({
         name: 'Lucas',
         email: 'lucas@lucas.com',
         password: '1234567'
     }).expect(201)
+
+    const user = await User.findById(response.body.user._id)
+    expect(user).not.toBeNull()
+
+    expect(response.body).toMatchObject({
+        user: {
+            name: 'Lucas',
+            email: 'lucas@lucas.com'
+        },
+        token: user.tokens[0].token
+    })
+    expect(user.password).not.toBe('1234567')
 })
 
 test('Should login existing user', async () => {
